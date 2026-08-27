@@ -21,81 +21,6 @@
 </div>
 
 
-<!-- Stats -->
-
-<div class="row g-3 mb-4">
-
-    <div class="col-md-4">
-
-        <div class="card border-0 shadow-sm h-100">
-
-            <div class="card-body">
-
-                <p class="text-muted mb-2">
-                    Total Movies
-                </p>
-
-                <h2
-                    id="movie-count"
-                    class="fw-bold"
-                >
-                    ...
-                </h2>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <div class="col-md-4">
-
-        <div class="card border-0 shadow-sm h-100">
-
-            <div class="card-body">
-
-                <p class="text-muted mb-2">
-                    Total Reviews
-                </p>
-
-                <h2
-                    id="review-count"
-                    class="fw-bold"
-                >
-                    ...
-                </h2>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <div class="col-md-4">
-
-        <div class="card border-0 shadow-sm h-100">
-
-            <div class="card-body">
-
-                <p class="text-muted mb-2">
-                    API Status
-                </p>
-
-                <h2 class="text-success fw-bold">
-                    Online
-                </h2>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
-
-
 <!-- Recent Movies -->
 
 <div class="card border-0 shadow-sm">
@@ -134,7 +59,7 @@
             id="dashboard-error"
             class="alert alert-danger d-none"
         >
-            Failed to load dashboard data.
+            Failed to load movies.
         </div>
 
 
@@ -175,30 +100,6 @@ async function loadDashboard() {
 
         const movieData =
             await movieResponse.json();
-
-
-        const reviewResponse = await fetch(
-            "/api/reviews/?page_size=1"
-        );
-
-        if (!reviewResponse.ok) {
-            throw new Error("Review API failed");
-        }
-
-        const reviewData =
-            await reviewResponse.json();
-
-
-        document.getElementById(
-            "movie-count"
-        ).textContent =
-            movieData.count ?? 0;
-
-
-        document.getElementById(
-            "review-count"
-        ).textContent =
-            reviewData.count ?? 0;
 
 
         renderMovies(
