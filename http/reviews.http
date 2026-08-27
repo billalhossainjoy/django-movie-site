@@ -1,0 +1,79 @@
+@baseUrl = http://localhost:8000
+
+### List all reviews
+GET {{baseUrl}}/api/reviews
+Accept: application/json
+
+
+### Create review
+@movieCreateId=4cd5b774-83f4-49c2-bea3-3417a522dcb8
+
+POST {{baseUrl}}/api/reviews/
+Content-Type: application/json
+X-CSRFToken: {{csrfToken}}
+
+{
+  "movie": "{{movieCreateId}}",
+  "rating": 9,
+  "content": "Excellent movie. Great story and visuals."
+}
+
+
+### Try duplicate review
+# Should return 400 because one user can review
+# the same movie only once.
+@movieId=4cd5b774-83f4-49c2-bea3-3417a522dcb8
+
+POST {{baseUrl}}/api/reviews/
+Content-Type: application/json
+X-CSRFToken: {{csrfToken}}
+
+{
+  "movie": "{{movieId}}",
+  "rating": 8,
+  "content": "Trying to review the same movie again."
+}
+
+
+### Get single review
+
+@reviewId=cc1d313e-5194-4296-a9bd-7b9c23d50021
+GET {{baseUrl}}/api/reviews/{{reviewId}}
+Accept: application/json
+
+
+### Full update review
+PUT {{baseUrl}}/api/reviews/{{reviewId}}
+Content-Type: application/json
+X-CSRFToken: {{csrfToken}}
+
+{
+  "movie": "{{movieId}}",
+  "rating": 10,
+  "content": "Updated review. Even better after watching again."
+}
+
+
+### Partial update review
+PATCH {{baseUrl}}/api/reviews/{{reviewId}}
+Content-Type: application/json
+X-CSRFToken: {{csrfToken}}
+
+{
+  "rating": 10
+}
+
+
+### Update only content
+PATCH {{baseUrl}}/api/reviews/{{reviewId}}
+Content-Type: application/json
+X-CSRFToken: {{csrfToken}}
+
+{
+  "content": "Updated review content."
+}
+
+
+### Delete review
+DELETE {{baseUrl}}/api/reviews/{{reviewId}}
+X-CSRFToken: {{csrfToken}}

@@ -1,0 +1,47 @@
+@baseUrl = http://localhost:8000
+
+### Get CSRF token
+GET {{baseUrl}}/api/auth/csrf
+Accept: application/json
+
+> {%
+    client.global.set(
+        "csrfToken",
+        response.body.csrf_token
+    );
+%}
+
+
+### Signup
+POST {{baseUrl}}/api/auth/signup
+Content-Type: application/json
+X-CSRFToken: {{csrfToken}}
+
+{
+  "username": "admin2",
+  "password": "admin123",
+  "password_confirm": "admin123"
+}
+
+
+### Login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+X-CSRFToken: {{csrfToken}}
+
+{
+  "username": "admin2",
+  "password": "admin123"
+}
+
+
+### Current user
+GET {{baseUrl}}/api/auth/user
+Accept: application/json
+
+
+### Logout
+POST {{baseUrl}}/api/auth/logout
+Accept: application/json
+X-CSRFToken: {{csrfToken}}
+

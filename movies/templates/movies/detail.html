@@ -1,0 +1,1188 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+Movie Details | MovieSite
+{% endblock %}
+
+
+{% block content %}
+
+<div class="mb-3">
+
+    <a
+        href="{% url 'movie-list-page' %}"
+        class="btn btn-outline-secondary btn-sm"
+    >
+        ← Back to Movies
+    </a>
+
+</div>
+
+
+<!-- Movie Loading -->
+
+<div
+    id="loading"
+    class="text-muted"
+>
+    Loading movie...
+</div>
+
+
+<!-- Movie Error -->
+
+<div
+    id="error-message"
+    class="alert alert-danger d-none"
+>
+    Movie could not be loaded.
+</div>
+
+
+<div
+    id="movie-container"
+    class="d-none"
+>
+
+    <!-- Movie Details -->
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-body p-4">
+
+            <div
+                class="d-flex flex-column flex-md-row
+                       justify-content-between
+                       gap-3 mb-4"
+            >
+
+                <div>
+
+                    <h1
+                        id="movie-title"
+                        class="fw-bold mb-2"
+                    >
+                    </h1>
+
+                    <p
+                        id="movie-meta"
+                        class="text-muted mb-0"
+                    >
+                    </p>
+
+                </div>
+
+
+                <div
+                    id="movie-actions"
+                    class="d-flex gap-2"
+                >
+                </div>
+
+            </div>
+
+
+            <hr>
+
+
+            <div class="row g-4">
+
+                <div class="col-md-8">
+
+                    <h5>
+                        Description
+                    </h5>
+
+                    <p
+                        id="movie-description"
+                        class="text-muted"
+                    >
+                    </p>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <div class="border rounded p-3">
+
+                        <p>
+
+                            <strong>
+                                Director
+                            </strong>
+
+                            <br>
+
+                            <span id="movie-director"></span>
+
+                        </p>
+
+
+                        <p>
+
+                            <strong>
+                                Release Year
+                            </strong>
+
+                            <br>
+
+                            <span id="movie-year"></span>
+
+                        </p>
+
+
+                        <p>
+
+                            <strong>
+                                Created By
+                            </strong>
+
+                            <br>
+
+                            <span id="movie-created-by"></span>
+
+                        </p>
+
+
+                        <p class="mb-1">
+
+                            <strong>
+                                Genres
+                            </strong>
+
+                        </p>
+
+
+                        <div
+                            id="movie-genres"
+                            class="mt-2"
+                        >
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- Reviews -->
+
+    <div class="card border-0 shadow-sm mt-4">
+
+        <div class="card-header bg-white py-3">
+
+            <h4 class="mb-0">
+                Reviews
+            </h4>
+
+        </div>
+
+
+        <div class="card-body">
+
+            <!-- Loading -->
+
+            <div
+                id="reviews-loading"
+                class="text-muted"
+            >
+                Loading reviews...
+            </div>
+
+
+            <!-- Reviews -->
+
+            <div
+                id="reviews-list"
+                class="mb-4"
+            >
+            </div>
+
+
+
+            {% if request.user.is_authenticated %}
+
+                <hr>
+
+
+                <h5 class="mb-3">
+                    Write a Review
+                </h5>
+
+
+                <div
+                    id="review-success"
+                    class="alert alert-success d-none"
+                >
+                    Review submitted successfully.
+                </div>
+
+
+                <div
+                    id="review-error"
+                    class="alert alert-danger d-none"
+                >
+                </div>
+
+
+                <form id="review-form">
+
+                    {% csrf_token %}
+
+
+                    <div class="mb-3">
+
+                        <label
+                            for="rating"
+                            class="form-label"
+                        >
+                            Rating
+                        </label>
+
+
+                        <select
+                            id="rating"
+                            class="form-select"
+                            required
+                        >
+
+                            <option value="">
+                                Select rating
+                            </option>
+
+                            <option value="10">10 - Excellent</option>
+                            <option value="9">9</option>
+                            <option value="8">8</option>
+                            <option value="7">7</option>
+                            <option value="6">6</option>
+                            <option value="5">5</option>
+                            <option value="4">4</option>
+                            <option value="3">3</option>
+                            <option value="2">2</option>
+                            <option value="1">1 - Poor</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label
+                            for="review-content"
+                            class="form-label"
+                        >
+                            Review
+                        </label>
+
+
+                        <textarea
+                            id="review-content"
+                            class="form-control"
+                            rows="4"
+                            placeholder="Write your review..."
+                            required
+                        ></textarea>
+
+                    </div>
+
+
+                    <button
+                        id="review-submit-button"
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        Submit Review
+                    </button>
+
+                </form>
+
+
+            {% else %}
+
+                <div class="alert alert-info mb-0">
+
+                    You need to
+
+                    <a
+                        href="/auth/login/"
+                        class="alert-link"
+                    >
+                        login
+                    </a>
+
+                    to write a review.
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+
+{% block extra_js %}
+
+<script>
+
+const movieId =
+    "{{ movie_id }}";
+
+
+
+// ======================================================
+// LOAD MOVIE
+// ======================================================
+
+async function loadMovie() {
+
+    const loading =
+        document.getElementById(
+            "loading"
+        );
+
+
+    const errorMessage =
+        document.getElementById(
+            "error-message"
+        );
+
+
+    const movieContainer =
+        document.getElementById(
+            "movie-container"
+        );
+
+
+    try {
+
+        const response =
+            await fetch(
+                `/api/movies/${movieId}/`
+            );
+
+
+        if (!response.ok) {
+
+            if (response.status === 404) {
+
+                throw new Error(
+                    "Movie not found."
+                );
+
+            }
+
+
+            throw new Error(
+                "Failed to load movie."
+            );
+
+        }
+
+
+        const movie =
+            await response.json();
+
+
+        renderMovie(movie);
+
+
+        loading.classList.add(
+            "d-none"
+        );
+
+
+        movieContainer.classList.remove(
+            "d-none"
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+
+        loading.classList.add(
+            "d-none"
+        );
+
+
+        errorMessage.textContent =
+            error.message;
+
+
+        errorMessage.classList.remove(
+            "d-none"
+        );
+
+    }
+
+}
+
+
+
+// ======================================================
+// RENDER MOVIE
+// ======================================================
+
+function renderMovie(movie) {
+
+    document.getElementById(
+        "movie-title"
+    ).textContent =
+        movie.title;
+
+
+    document.getElementById(
+        "movie-description"
+    ).textContent =
+        movie.description;
+
+
+    document.getElementById(
+        "movie-director"
+    ).textContent =
+        movie.director;
+
+
+    document.getElementById(
+        "movie-year"
+    ).textContent =
+        movie.release_year;
+
+
+    document.getElementById(
+        "movie-created-by"
+    ).textContent =
+        movie.created_by ?? "Unknown";
+
+
+    document.getElementById(
+        "movie-meta"
+    ).textContent =
+        `${movie.release_year} • ${movie.director}`;
+
+
+    renderGenres(
+        movie.genres ?? []
+    );
+
+
+    renderActions(movie);
+
+}
+
+
+
+// ======================================================
+// GENRES
+// ======================================================
+
+function renderGenres(genres) {
+
+    const container =
+        document.getElementById(
+            "movie-genres"
+        );
+
+
+    if (genres.length === 0) {
+
+        container.innerHTML = `
+
+            <span class="text-muted">
+                No genres
+            </span>
+
+        `;
+
+        return;
+
+    }
+
+
+    container.innerHTML =
+        genres.map(genre => {
+
+            const genreName =
+                typeof genre === "object"
+                    ? genre.name
+                    : genre;
+
+
+            return `
+
+                <span
+                    class="badge bg-secondary me-1 mb-1"
+                >
+                    ${escapeHtml(genreName)}
+                </span>
+
+            `;
+
+        }).join("");
+
+}
+
+
+
+// ======================================================
+// MOVIE ACTIONS
+// ======================================================
+
+function renderActions(movie) {
+
+    const container =
+        document.getElementById(
+            "movie-actions"
+        );
+
+
+    const loggedInUser =
+        "{{ request.user.username|escapejs }}";
+
+
+    const isAuthenticated =
+        "{{ request.user.is_authenticated|yesno:'true,false' }}"
+        === "true";
+
+
+    if (
+        isAuthenticated &&
+        movie.created_by === loggedInUser
+    ) {
+
+        container.innerHTML = `
+
+            <a
+                href="/movies/${movie.id}/edit/"
+                class="btn btn-outline-primary"
+            >
+                Edit
+            </a>
+
+
+            <button
+                id="delete-button"
+                class="btn btn-outline-danger"
+            >
+                Delete
+            </button>
+
+        `;
+
+
+        document.getElementById(
+            "delete-button"
+        ).addEventListener(
+            "click",
+            function () {
+
+                deleteMovie(
+                    movie.id
+                );
+
+            }
+        );
+
+    }
+
+}
+
+
+
+// ======================================================
+// DELETE MOVIE
+// ======================================================
+
+async function deleteMovie(id) {
+
+    const confirmed =
+        window.confirm(
+            "Are you sure you want to delete this movie?"
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                `/api/movies/${id}/`,
+                {
+
+                    method: "DELETE",
+
+                    headers: {
+
+                        "X-CSRFToken":
+                            getCsrfToken()
+
+                    }
+
+                }
+            );
+
+
+        if (!response.ok) {
+
+            const data =
+                await response.json();
+
+
+            throw new Error(
+                data.detail ??
+                "Could not delete movie."
+            );
+
+        }
+
+
+        window.location.href =
+            "/movies/";
+
+    }
+
+    catch (error) {
+
+        alert(
+            error.message
+        );
+
+    }
+
+}
+
+
+
+// ======================================================
+// LOAD REVIEWS
+// ======================================================
+
+async function loadReviews() {
+
+    const loading =
+        document.getElementById(
+            "reviews-loading"
+        );
+
+
+    try {
+
+        /*
+         * We request the reviews API.
+         *
+         * If your backend supports filtering,
+         * ?movie=<uuid> will return only this movie.
+         */
+
+        const response =
+            await fetch(
+                `/api/reviews/?movie=${movieId}`
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                `Failed to load reviews: ${response.status}`
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        console.log(
+            "Review API response:",
+            data
+        );
+
+
+        /*
+         * Supports both:
+         *
+         * [...]
+         *
+         * and:
+         *
+         * {
+         *   count: 2,
+         *   results: [...]
+         * }
+         */
+
+        const allReviews =
+            Array.isArray(data)
+                ? data
+                : data.results ?? [];
+
+
+        /*
+         * Filter again in frontend.
+         *
+         * This means this page still shows
+         * only reviews for the current movie
+         * even if the API query parameter
+         * is currently ignored.
+         */
+
+        const movieReviews =
+            allReviews.filter(
+                review =>
+                    String(review.movie) ===
+                    String(movieId)
+            );
+
+
+        loading.classList.add(
+            "d-none"
+        );
+
+
+        renderReviews(
+            movieReviews
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Review loading error:",
+            error
+        );
+
+
+        loading.textContent =
+            "Could not load reviews.";
+
+    }
+
+}
+
+
+
+// ======================================================
+// RENDER REVIEWS
+// ======================================================
+
+function renderReviews(reviews) {
+
+    const container =
+        document.getElementById(
+            "reviews-list"
+        );
+
+
+    if (reviews.length === 0) {
+
+        container.innerHTML = `
+
+            <div class="text-muted py-2">
+                No reviews for this movie yet.
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    container.innerHTML =
+        reviews.map(review => `
+
+            <div class="border-bottom py-3">
+
+                <div
+                    class="d-flex
+                           justify-content-between
+                           align-items-center
+                           gap-3"
+                >
+
+                    <strong>
+                        ${escapeHtml(
+                            review.user ?? "User"
+                        )}
+                    </strong>
+
+
+                    <span class="badge bg-primary">
+
+                        ${escapeHtml(
+                            review.rating
+                        )}/10
+
+                    </span>
+
+                </div>
+
+
+                <p class="mt-2 mb-2">
+
+                    ${escapeHtml(
+                        review.content
+                    )}
+
+                </p>
+
+
+                <small class="text-muted">
+
+                    ${formatDate(
+                        review.created_at
+                    )}
+
+                </small>
+
+            </div>
+
+        `).join("");
+
+}
+
+
+
+// ======================================================
+// CREATE REVIEW
+// ======================================================
+
+const reviewForm =
+    document.getElementById(
+        "review-form"
+    );
+
+
+if (reviewForm) {
+
+    reviewForm.addEventListener(
+        "submit",
+        async function (event) {
+
+            event.preventDefault();
+
+
+            const errorBox =
+                document.getElementById(
+                    "review-error"
+                );
+
+
+            const successBox =
+                document.getElementById(
+                    "review-success"
+                );
+
+
+            const submitButton =
+                document.getElementById(
+                    "review-submit-button"
+                );
+
+
+            errorBox.classList.add(
+                "d-none"
+            );
+
+
+            successBox.classList.add(
+                "d-none"
+            );
+
+
+            const rating =
+                document.getElementById(
+                    "rating"
+                ).value;
+
+
+            const content =
+                document.getElementById(
+                    "review-content"
+                ).value.trim();
+
+
+            submitButton.disabled =
+                true;
+
+
+            submitButton.textContent =
+                "Submitting...";
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/reviews/",
+                        {
+
+                            method: "POST",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json",
+
+                                "X-CSRFToken":
+                                    getCsrfToken()
+
+                            },
+
+                            body:
+                                JSON.stringify({
+
+                                    movie:
+                                        movieId,
+
+                                    rating:
+                                        Number(rating),
+
+                                    content:
+                                        content
+
+                                })
+
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        formatReviewError(
+                            data
+                        )
+                    );
+
+                }
+
+
+                reviewForm.reset();
+
+
+                successBox.classList.remove(
+                    "d-none"
+                );
+
+
+                await loadReviews();
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Review submit error:",
+                    error
+                );
+
+
+                errorBox.textContent =
+                    error.message;
+
+
+                errorBox.classList.remove(
+                    "d-none"
+                );
+
+            }
+
+            finally {
+
+                submitButton.disabled =
+                    false;
+
+
+                submitButton.textContent =
+                    "Submit Review";
+
+            }
+
+        }
+    );
+
+}
+
+
+
+// ======================================================
+// REVIEW ERROR
+// ======================================================
+
+function formatReviewError(data) {
+
+    if (data.detail) {
+        return data.detail;
+    }
+
+
+    if (data.movie) {
+
+        return Array.isArray(data.movie)
+            ? data.movie.join(" ")
+            : data.movie;
+
+    }
+
+
+    if (data.rating) {
+
+        return Array.isArray(data.rating)
+            ? data.rating.join(" ")
+            : data.rating;
+
+    }
+
+
+    if (data.content) {
+
+        return Array.isArray(data.content)
+            ? data.content.join(" ")
+            : data.content;
+
+    }
+
+
+    if (data.non_field_errors) {
+
+        return Array.isArray(
+            data.non_field_errors
+        )
+            ? data.non_field_errors.join(" ")
+            : data.non_field_errors;
+
+    }
+
+
+    return "Could not submit review.";
+
+}
+
+
+
+// ======================================================
+// CSRF
+// ======================================================
+
+function getCsrfToken() {
+
+    const input =
+        document.querySelector(
+            "[name=csrfmiddlewaretoken]"
+        );
+
+
+    if (input) {
+        return input.value;
+    }
+
+
+    const cookies =
+        document.cookie.split(";");
+
+
+    for (const cookie of cookies) {
+
+        const [
+            name,
+            value
+        ] =
+            cookie.trim().split("=");
+
+
+        if (name === "csrftoken") {
+
+            return decodeURIComponent(
+                value
+            );
+
+        }
+
+    }
+
+
+    return "";
+
+}
+
+
+
+// ======================================================
+// DATE
+// ======================================================
+
+function formatDate(value) {
+
+    if (!value) {
+        return "";
+    }
+
+
+    return new Date(
+        value
+    ).toLocaleDateString();
+
+}
+
+
+
+// ======================================================
+// HTML ESCAPE
+// ======================================================
+
+function escapeHtml(value) {
+
+    const element =
+        document.createElement(
+            "div"
+        );
+
+
+    element.textContent =
+        String(value ?? "");
+
+
+    return element.innerHTML;
+
+}
+
+
+
+// ======================================================
+// START PAGE
+// ======================================================
+
+loadMovie();
+loadReviews();
+
+</script>
+
+{% endblock %}

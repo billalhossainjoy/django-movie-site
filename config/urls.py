@@ -25,5 +25,13 @@ urlpatterns = [
     path("api/auth/", include("accounts.api_urls")),
 
     # Movie urls
-    path('movies/', include('movies.api_urls')),
+    path('movies/', include('movies.urls')),
+    path('api/movies/', include('movies.api_urls')),
+
+    # Review Urls
+    path('reviews/', include('reviews.urls')),
+    path('api/reviews/', include('reviews.api_urls')),
+
+    path('', include('home.urls')),
+    path('dashboard/', include('dashboard.urls')),
 ]

@@ -1,10 +1,309 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>signup</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-</body>
-</html>
+
+{% block title %}
+    Sign Up | MovieSite
+{% endblock %}
+
+
+{% block content %}
+
+<div class="row justify-content-center">
+
+    <div class="col-md-7 col-lg-6">
+
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-body p-4">
+
+                <h2 class="fw-bold mb-1">
+                    Create Account
+                </h2>
+
+                <p class="text-muted mb-4">
+                    Create your MovieSite account.
+                </p>
+
+
+                <div
+                    id="error-message"
+                    class="alert alert-danger d-none"
+                >
+                </div>
+
+
+                <form id="signup-form">
+
+                    {% csrf_token %}
+
+
+                    <div class="mb-3">
+
+                        <label
+                            for="username"
+                            class="form-label"
+                        >
+                            Username
+                        </label>
+
+                        <input
+                            type="text"
+                            id="username"
+                            class="form-control"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label
+                            for="email"
+                            class="form-label"
+                        >
+                            Email
+                        </label>
+
+                        <input
+                            type="email"
+                            id="email"
+                            class="form-control"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label
+                            for="password"
+                            class="form-label"
+                        >
+                            Password
+                        </label>
+
+                        <input
+                            type="password"
+                            id="password"
+                            class="form-control"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label
+                            for="password-confirm"
+                            class="form-label"
+                        >
+                            Confirm Password
+                        </label>
+
+                        <input
+                            type="password"
+                            id="password-confirm"
+                            class="form-control"
+                            required
+                        >
+
+                    </div>
+
+
+                    <button
+                        id="signup-button"
+                        type="submit"
+                        class="btn btn-primary w-100"
+                    >
+                        Create Account
+                    </button>
+
+                </form>
+
+
+                <p class="text-center mt-4 mb-0">
+
+                    Already have an account?
+
+                    <a href="{% url 'login-page' %}">
+                        Login
+                    </a>
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script>
+
+const signupForm =
+    document.getElementById(
+        "signup-form"
+    );
+
+const errorMessage =
+    document.getElementById(
+        "error-message"
+    );
+
+const signupButton =
+    document.getElementById(
+        "signup-button"
+    );
+
+
+signupForm.addEventListener(
+    "submit",
+    async function (event) {
+
+        event.preventDefault();
+
+        errorMessage.classList.add(
+            "d-none"
+        );
+
+        signupButton.disabled = true;
+
+        signupButton.textContent =
+            "Creating account...";
+
+
+        const csrfToken =
+            document.querySelector(
+                "[name=csrfmiddlewaretoken]"
+            ).value;
+
+
+        const payload = {
+
+            username:
+                document.getElementById(
+                    "username"
+                ).value,
+
+            email:
+                document.getElementById(
+                    "email"
+                ).value,
+
+            password:
+                document.getElementById(
+                    "password"
+                ).value,
+
+            password_confirm:
+                document.getElementById(
+                    "password-confirm"
+                ).value
+
+        };
+
+
+        try {
+
+            const response = await fetch(
+                "/api/auth/signup/",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": csrfToken
+                    },
+
+                    body: JSON.stringify(
+                        payload
+                    )
+                }
+            );
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    formatErrors(data)
+                );
+
+            }
+
+
+            window.location.href =
+                "/auth/login/";
+
+        }
+
+        catch (error) {
+
+            errorMessage.textContent =
+                error.message;
+
+            errorMessage.classList.remove(
+                "d-none"
+            );
+
+        }
+
+        finally {
+
+            signupButton.disabled = false;
+
+            signupButton.textContent =
+                "Create Account";
+
+        }
+
+    }
+);
+
+
+function formatErrors(data) {
+
+    if (data.detail) {
+        return data.detail;
+    }
+
+
+    const messages = [];
+
+
+    for (const field in data) {
+
+        const errors = data[field];
+
+        if (Array.isArray(errors)) {
+
+            errors.forEach(error => {
+                messages.push(
+                    `${field}: ${error}`
+                );
+            });
+
+        }
+
+    }
+
+
+    return messages.join(" | ")
+        || "Signup failed.";
+}
+
+</script>
+
+{% endblock %}

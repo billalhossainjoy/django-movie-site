@@ -1,10 +1,219 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>login</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-</body>
-</html>
+
+{% block title %}
+    Login | MovieSite
+{% endblock %}
+
+
+{% block content %}
+
+<div class="row justify-content-center">
+
+    <div class="col-md-6 col-lg-5">
+
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-body p-4">
+
+                <h2 class="fw-bold mb-1">
+                    Login
+                </h2>
+
+                <p class="text-muted mb-4">
+                    Sign in to your MovieSite account.
+                </p>
+
+
+                <div
+                    id="error-message"
+                    class="alert alert-danger d-none"
+                >
+                </div>
+
+
+                <form id="login-form">
+
+                    {% csrf_token %}
+
+
+                    <div class="mb-3">
+
+                        <label
+                            for="username"
+                            class="form-label"
+                        >
+                            Username
+                        </label>
+
+                        <input
+                            type="text"
+                            id="username"
+                            class="form-control"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label
+                            for="password"
+                            class="form-label"
+                        >
+                            Password
+                        </label>
+
+                        <input
+                            type="password"
+                            id="password"
+                            class="form-control"
+                            required
+                        >
+
+                    </div>
+
+
+                    <button
+                        id="login-button"
+                        type="submit"
+                        class="btn btn-primary w-100"
+                    >
+                        Login
+                    </button>
+
+                </form>
+
+
+                <p class="text-center mt-4 mb-0">
+
+                    Don't have an account?
+
+                    <a href="{% url 'signup-page' %}">
+                        Sign Up
+                    </a>
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+
+<script>
+
+const loginForm =
+    document.getElementById("login-form");
+
+const errorMessage =
+    document.getElementById("error-message");
+
+const loginButton =
+    document.getElementById("login-button");
+
+
+loginForm.addEventListener(
+    "submit",
+    async function (event) {
+
+        event.preventDefault();
+
+        errorMessage.classList.add("d-none");
+
+        loginButton.disabled = true;
+        loginButton.textContent = "Logging in...";
+
+
+        const csrfToken =
+            document.querySelector(
+                "[name=csrfmiddlewaretoken]"
+            ).value;
+
+
+        const username =
+            document.getElementById(
+                "username"
+            ).value;
+
+
+        const password =
+            document.getElementById(
+                "password"
+            ).value;
+
+
+        try {
+
+            const response = await fetch(
+                "/api/auth/login/",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": csrfToken
+                    },
+
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+                }
+            );
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.detail ||
+                    data.non_field_errors?.[0] ||
+                    "Login failed."
+                );
+
+            }
+
+
+            window.location.href =
+                "/";
+
+        }
+
+        catch (error) {
+
+            errorMessage.textContent =
+                error.message;
+
+            errorMessage.classList.remove(
+                "d-none"
+            );
+
+        }
+
+        finally {
+
+            loginButton.disabled = false;
+
+            loginButton.textContent =
+                "Login";
+
+        }
+
+    }
+);
+
+</script>
+
+{% endblock %}

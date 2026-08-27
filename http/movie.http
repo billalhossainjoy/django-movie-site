@@ -1,0 +1,156 @@
+@baseUrl = http://localhost:8000
+
+# Replace this with your actual CSRF token
+#@csrfToken = YOUR_CSRF_TOKEN
+
+
+### ------------------------------------------------
+### GENRES
+### ------------------------------------------------
+
+
+### List genres
+GET {{baseUrl}}/api/movies/genres
+Accept: application/json
+
+
+### Create genre
+POST {{baseUrl}}/api/movies/genres
+Content-Type: application/json
+X-CSRFToken: {{csrfToken}}
+
+{
+  "name": "Sci-Fi"
+}
+
+### Get genre
+@genreGetId = 7b6be572-15ab-4d2e-ac28-497a661f7028
+GET {{baseUrl}}/api/movies/genres/{{genreId}}
+Accept: application/json
+
+
+### Update genre
+@genreUpdateId = ef6e0be4-ccae-4502-99e8-601fd6478f04
+PUT {{baseUrl}}/api/movies/genres/{{genreUpdateId}}
+Content-Type: application/json
+X-CSRFToken: {{csrfToken}}
+
+{
+  "name": "Science Fiction"
+}
+
+
+### Partial update genre
+@genrePartialId = ef6e0be4-ccae-4502-99e8-601fd6478f04
+PATCH {{baseUrl}}/api/movies/genres/{{genrePartialId}}
+Content-Type: application/json
+X-CSRFToken: {{csrfToken}}
+
+{
+  "name": "Sci-Fi"
+}
+
+
+### ------------------------------------------------
+### MOVIES
+### ------------------------------------------------
+
+
+### List movies
+GET {{baseUrl}}/api/movies/
+Accept: application/json
+
+
+### List movies - pagination
+GET {{baseUrl}}/api/movies/?page=1&page_size=5
+Accept: application/json
+
+
+### Search movies
+GET {{baseUrl}}/api/movies/?search=nolan
+Accept: application/json
+
+
+### Filter by release year
+GET {{baseUrl}}/api/movies/?release_year=2014
+Accept: application/json
+
+
+### Filter by genre
+GET {{baseUrl}}/api/movies/?genres={{genreId}}
+Accept: application/json
+
+
+### Order by title
+GET {{baseUrl}}/api/movies/?ordering=title
+Accept: application/json
+
+
+### Newest first
+GET {{baseUrl}}/api/movies/?ordering=-created_at
+Accept: application/json
+
+
+### Search + filter + ordering
+GET {{baseUrl}}/api/movies/?search=nolan&release_year=2014&ordering=-created_at
+Accept: application/json
+
+
+### Create movie
+@moveGenreId = b99a81a9-3a83-4a61-b583-ce8879086d3b
+
+POST {{baseUrl}}/api/movies/
+Content-Type: application/json
+X-CSRFToken: {{csrfToken}}
+
+{
+  "title": "Interstellar",
+  "description": "A team travels through a wormhole in search of a new home for humanity.",
+  "release_year": 2014,
+  "director": "Christopher Nolan",
+  "genres": [
+    "{{moveGenreId}}"
+  ]
+}
+
+
+### Get movie
+@movieId = bbe4f3c0-0422-4029-a3de-34dd69f47ec9
+GET {{baseUrl}}/api/movies/{{movieId}}
+Accept: application/json
+
+
+### Full update movie
+PUT {{baseUrl}}/api/movies/{{movieId}}
+Content-Type: application/json
+X-CSRFToken: {{csrfToken}}
+
+{
+  "title": "Interstellar",
+  "description": "Updated description.",
+  "release_year": 2014,
+  "director": "Christopher Nolan",
+  "genres": [
+    "{{genreId}}"
+  ]
+}
+
+
+### Partial update movie
+PATCH {{baseUrl}}/api/movies/{{movieId}}
+Content-Type: application/json
+X-CSRFToken: {{csrfToken}}
+
+{
+  "description": "Updated movie description."
+}
+
+
+### Delete movie
+DELETE {{baseUrl}}/api/movies/{{movieId}}
+X-CSRFToken: {{csrfToken}}
+
+
+### Delete genre
+DELETE {{baseUrl}}/api/movies/genres/{{genreId}}
+X-CSRFToken: {{csrfToken}}

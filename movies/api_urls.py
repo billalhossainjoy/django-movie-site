@@ -1,14 +1,14 @@
 from django.urls import path
 
-from movies.api_views import ListCreateMovie, GetUpdateDeleteMovie
+from movies.api_views import ListCreateMovie, GetUpdateDeleteMovie, ListCreateGenre, GetUpdateDeleteGenre
 
 urlpatterns= [
     # movies
     path('', ListCreateMovie.as_view(), name='list-create-movie'),
-    path('<int:id>', GetUpdateDeleteMovie.as_view(), name='get-update-delete-movie'),
+    path('<uuid:pk>/', GetUpdateDeleteMovie.as_view(), name='get-update-delete-movie'),
 
     # genres
-    path('', ListCreateMovie.as_view(), name='list-create-genre'),
-    path('<int:id>', GetUpdateDeleteMovie.as_view(), name='get-update-delete-genre')
+    path('genres/', ListCreateGenre.as_view(), name='list-create-genre'),
+    path('genres/<uuid:pk>/', GetUpdateDeleteGenre.as_view(), name='get-update-delete-genre')
 ]
 
